@@ -1,0 +1,102 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Question",
+  "description": "Schema for a question in the Quiz Connect application, supporting multiple types.",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "The unique identifier for the question."
+    },
+    "quiz_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "The ID of the quiz this question belongs to."
+    },
+    "text": {
+      "type": "string",
+      "description": "The text of the question."
+    },
+    "type": {
+      "type": "string",
+      "enum": ["multiple-choice", "multiple-response", "true-false", "short-answer", "poll"],
+      "description": "The type of the question."
+    },
+    "image_url": {
+      "type": "string",
+      "format": "uri",
+      "description": "URL for an image associated with the question."
+    },
+    "time_limit": {
+      "type": "integer",
+      "description": "The time limit for this question in seconds."
+    },
+    "order_index": {
+      "type": "integer",
+      "description": "The order of this question within the quiz."
+    },
+    "options": {
+      "type": "array",
+      "description": "A list of possible answers for the question.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "text": {
+            "type": "string"
+          },
+          "is_correct": {
+            "type": "boolean"
+          },
+          "order_index": {
+            "type": "integer"
+          }
+        },
+        "required": ["id", "text", "is_correct", "order_index"]
+      }
+    }
+  },
+  "required": [
+    "id",
+    "quiz_id",
+    "text",
+    "type",
+    "order_index"
+  ],
+  "oneOf": [
+    {
+      "properties": {
+        "type": { "const": "multiple-choice" },
+        "options": { "minItems": 2 }
+      }
+    },
+    {
+      "properties": {
+        "type": { "const": "multiple-response" },
+        "options": { "minItems": 2 }
+      }
+    },
+    {
+      "properties": {
+        "type": { "const": "true-false" },
+        "options": { "minItems": 2, "maxItems": 2 }
+      }
+    },
+    {
+      "properties": {
+        "type": { "const": "short-answer" },
+        "options": { "maxItems": 0 }
+      }
+    },
+    {
+      "properties": {
+        "type": { "const": "poll" },
+        "options": { "minItems": 2 }
+      }
+    }
+  ]
+}

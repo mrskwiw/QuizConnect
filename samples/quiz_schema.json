@@ -1,0 +1,74 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Quiz",
+  "description": "Schema for a quiz in the Quiz Connect application.",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "The unique identifier for the quiz."
+    },
+    "author_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "The user ID of the quiz's author."
+    },
+    "title": {
+      "type": "string",
+      "description": "The title of the quiz."
+    },
+    "description": {
+      "type": "string",
+      "description": "A description of the quiz."
+    },
+    "category": {
+      "type": "string",
+      "description": "The category of the quiz."
+    },
+    "difficulty": {
+      "type": "string",
+      "description": "The difficulty level of the quiz."
+    },
+    "is_public": {
+      "type": "boolean",
+      "default": true,
+      "description": "Indicates if the quiz is public."
+    },
+    "time_limit": {
+      "type": "integer",
+      "description": "The time limit for the quiz in seconds."
+    },
+    "pass_threshold": {
+      "type": "integer",
+      "default": 70,
+      "description": "The passing score percentage for the quiz."
+    },
+    "visibility": {
+      "type": "string",
+      "default": "public",
+      "description": "The visibility setting for the quiz."
+    },
+    "allowed_users": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "description": "A list of user IDs allowed to take the quiz."
+    },
+    "community_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "The ID of the community this quiz belongs to, if any."
+    }
+  },
+  "required": [
+    "id",
+    "author_id",
+    "title",
+    "description",
+    "category",
+    "difficulty"
+  ]
+}

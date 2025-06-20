@@ -1,4 +1,3 @@
-import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { Clock, Users, ThumbsUp, Share2, Flag, Play, Edit } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
@@ -6,8 +5,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/Ca
 import { LoadingSpinner } from '../../components/ui/LoadingSpinner';
 import { useQuiz } from '../../hooks/useQuizzes';
 import { useAuth } from '../../contexts/AuthContext';
-import { socialService } from '../../lib/database';
 import { useToast } from '../../contexts/ToastContext';
+import { LikeButton } from '../../components/quiz/LikeButton';
+import { CommentSection } from '../../components/quiz/CommentSection';
 
 const QuizDetails = () => {
   const { id } = useParams<{ id: string }>();
@@ -15,37 +15,6 @@ const QuizDetails = () => {
   const { user } = useAuth();
   const { showToast } = useToast();
   const { quiz, isLoading, error } = useQuiz(id);
-  const [isLiked, setIsLiked] = useState(false);
-  const [likesCount, setLikesCount] = useState(0);
-
-  useEffect(() => {
-    if (quiz) {
-      setLikesCount(quiz.stats.likes);
-    }
-  }, [quiz]);
-
-  const handleLike = async () => {
-    if (!user) {
-      showToast('Please log in to like quizzes', 'warning');
-      return;
-    }
-
-    try {
-      if (isLiked) {
-        await socialService.unlikeQuiz(quiz!.id);
-        setIsLiked(false);
-        setLikesCount(prev => prev - 1);
-        showToast('Quiz unliked', 'info');
-      } else {
-        await socialService.likeQuiz(quiz!.id);
-        setIsLiked(true);
-        setLikesCount(prev => prev + 1);
-        showToast('Quiz liked!', 'success');
-      }
-    } catch (error) {
-      showToast('Failed to update like status', 'error');
-    }
-  };
 
   const handleShare = async () => {
     if (navigator.share) {
@@ -56,7 +25,7 @@ const QuizDetails = () => {
           url: window.location.href,
         });
       } catch (error) {
-        // User cancelled sharing
+        console.error('Share failed:', error);
       }
     } else {
       // Fallback to copying URL
@@ -103,37 +72,31 @@ const QuizDetails = () => {
             </span>
             <span className="flex items-center">
               <ThumbsUp size={16} className="mr-1" />
-              {likesCount} likes
+              {quiz.stats.likes} likes
             </span>
           </div>
         </div>
         <div className="flex space-x-2">
           {isOwner ? (
-            <Button 
-              variant="secondary" 
+            <Button
+              variant="secondary"
               icon={<Edit size={18} />}
               onClick={() => navigate(`/quiz/${quiz.id}/edit`)}
             >
               Edit Quiz
             </Button>
           ) : (
-            <Button 
-              variant="primary" 
+            <Button
+              variant="primary"
               icon={<Play size={18} />}
               onClick={() => navigate(`/take-quiz/${quiz.id}`)}
             >
               Start Quiz
             </Button>
           )}
-          <Button 
-            variant={isLiked ? "accent" : "secondary"} 
-            icon={<ThumbsUp size={18} />}
-            onClick={handleLike}
-          >
-            {isLiked ? 'Liked' : 'Like'}
-          </Button>
-          <Button 
-            variant="secondary" 
+          <LikeButton quizId={quiz.id} initialLikesCount={quiz.stats.likes} />
+          <Button
+            variant="secondary"
             icon={<Share2 size={18} />}
             onClick={handleShare}
           >
@@ -209,18 +172,18 @@ const QuizDetails = () => {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {quiz.questions.slice(0, 2).map((question, index) => (
+            {quiz.questions.slice(0, 2).map((question) => (
               <div key={question.id} className="border border-gray-200 rounded-lg p-4">
                 <p className="font-medium mb-3">{question.text}</p>
                 <div className="space-y-2">
-                  {question.options.map((option, optionIndex) => (
+                  {question.options.map((option) => (
                     <div
                       key={option.id}
                       className="flex items-center space-x-2 p-2 border border-gray-200 rounded hover:border-blue-300 cursor-pointer"
                     >
                       <input
                         type={question.type === 'MultipleChoice' ? 'checkbox' : 'radio'}
-                        name={`preview-question-${index}`}
+                        name={`preview-question-${question.id}-${option.id}`}
                         disabled
                         className="text-blue-600"
                       />
@@ -242,13 +205,19 @@ const QuizDetails = () => {
         </CardContent>
       </Card>
 
+      <Card>
+        <CardContent>
+          <CommentSection quizId={quiz.id} />
+        </CardContent>
+      </Card>
+
       <div className="flex justify-between items-center pt-4">
         <Button variant="ghost" icon={<Flag size={18} />}>
           Report Quiz
         </Button>
         {!isOwner && (
-          <Button 
-            variant="primary" 
+          <Button
+            variant="primary"
             size="lg"
             icon={<Play size={18} />}
             onClick={() => navigate(`/take-quiz/${quiz.id}`)}

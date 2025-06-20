@@ -18,8 +18,11 @@ const QuizDetails = lazy(() => import('../pages/quizzes/QuizDetails'));
 const TakeQuiz = lazy(() => import('../pages/quizzes/TakeQuiz'));
 const TemplateLibrary = lazy(() => import('../pages/templates/TemplateLibrary'));
 const Profile = lazy(() => import('../pages/profile/Profile'));
+const UserProfile = lazy(() => import('../pages/profile/UserProfile'));
 const EditProfile = lazy(() => import('../pages/profile/EditProfile'));
 const Pricing = lazy(() => import('../pages/subscription/Pricing'));
+const Feed = lazy(() => import('../pages/Feed'));
+const Leaderboard = lazy(() => import('../pages/Leaderboard'));
 const NotFound = lazy(() => import('../pages/NotFound'));
 
 export const AppRoutes = () => {
@@ -33,13 +36,16 @@ export const AppRoutes = () => {
           <Route path="quiz/:id" element={<QuizDetails />} />
           <Route path="templates" element={<TemplateLibrary />} />
           <Route path="pricing" element={<Pricing />} />
+          <Route path="leaderboard" element={<Leaderboard />} />
           
           {/* Protected routes */}
           <Route element={<ProtectedRoute />}>
             <Route path="dashboard" element={<Dashboard />} />
+            <Route path="feed" element={<Feed />} />
             <Route path="create-quiz" element={<CreateQuiz />} />
             <Route path="take-quiz/:id" element={<TakeQuiz />} />
-            <Route path="profile/:username" element={<Profile />} />
+            <Route path="profile/:username" element={<UserProfile />} />
+            <Route path="profile/me" element={<Profile />} />
             <Route path="profile/edit" element={<EditProfile />} />
           </Route>
         </Route>

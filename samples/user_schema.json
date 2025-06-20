@@ -1,0 +1,59 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "User",
+  "description": "Schema for a user in the Quiz Connect application.",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "The unique identifier for the user, referencing auth.users(id)."
+    },
+    "username": {
+      "type": "string",
+      "description": "The user's unique username."
+    },
+    "email": {
+      "type": "string",
+      "format": "email",
+      "description": "The user's unique email address."
+    },
+    "avatar_url": {
+      "type": "string",
+      "format": "uri",
+      "description": "URL for the user's avatar image."
+    },
+    "bio": {
+      "type": "string",
+      "description": "A short biography of the user."
+    },
+    "is_private": {
+      "type": "boolean",
+      "default": false,
+      "description": "Indicates if the user's profile is private."
+    },
+    "subscription_tier": {
+      "type": "string",
+      "default": "free",
+      "description": "The user's subscription tier."
+    },
+    "subscription_status": {
+      "type": "string",
+      "default": "active",
+      "description": "The status of the user's subscription."
+    },
+    "stripe_customer_id": {
+      "type": "string",
+      "description": "The user's Stripe customer ID."
+    },
+    "stripe_subscription_id": {
+      "type": "string",
+      "description": "The user's Stripe subscription ID."
+    }
+  },
+  "required": [
+    "id",
+    "username",
+    "email"
+  ]
+}

@@ -1,0 +1,57 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Community",
+  "description": "Schema for a community in the Quiz Connect application.",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "The unique identifier for the community."
+    },
+    "name": {
+      "type": "string",
+      "description": "The name of the community."
+    },
+    "description": {
+      "type": "string",
+      "description": "A description of the community."
+    },
+    "category": {
+      "type": "string",
+      "description": "The category of the community."
+    },
+    "is_private": {
+      "type": "boolean",
+      "default": false,
+      "description": "Indicates if the community is private."
+    },
+    "creator_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "The user ID of the community's creator."
+    },
+    "avatar_url": {
+      "type": "string",
+      "format": "uri",
+      "description": "URL for the community's avatar image."
+    },
+    "banner_url": {
+      "type": "string",
+      "format": "uri",
+      "description": "URL for the community's banner image."
+    },
+    "rules": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "A list of rules for the community."
+    }
+  },
+  "required": [
+    "id",
+    "name",
+    "creator_id"
+  ]
+}

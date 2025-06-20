@@ -189,9 +189,11 @@ export interface Comment {
   id: string;
   text: string;
   userId: string;
-  username: string;
-  avatarUrl: string | null;
   createdAt: string;
+  user: {
+    username: string;
+    avatarUrl: string | null;
+  };
 }
 
 // Notification types
@@ -219,11 +221,14 @@ export type NotificationType =
 
 // Leaderboard types
 export interface LeaderboardEntry {
-  userId: string;
-  username: string;
-  avatarUrl: string | null;
-  points: number;
-  rank: number;
+  user_id: string;
+  total_points: number;
+  weekly_points: number;
+  lifetime_points: number;
+  user: {
+    username: string;
+    avatar_url: string | null;
+  };
 }
 
 export interface WeeklyLeaderboard extends LeaderboardEntry {

@@ -1,0 +1,74 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Poll",
+  "description": "Schema for a poll in the Quiz Connect application. A poll is a type of question.",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "The unique identifier for the poll question."
+    },
+    "quiz_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "The ID of the quiz this poll belongs to."
+    },
+    "text": {
+      "type": "string",
+      "description": "The text of the poll question."
+    },
+    "type": {
+      "type": "string",
+      "const": "poll",
+      "description": "The type is always 'poll'."
+    },
+    "image_url": {
+      "type": "string",
+      "format": "uri",
+      "description": "URL for an image associated with the poll."
+    },
+    "time_limit": {
+      "type": "integer",
+      "description": "The time limit for this poll in seconds."
+    },
+    "order_index": {
+      "type": "integer",
+      "description": "The order of this poll within the quiz."
+    },
+    "options": {
+      "type": "array",
+      "description": "A list of possible options for the poll.",
+      "minItems": 2,
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "text": {
+            "type": "string"
+          },
+          "is_correct": {
+            "type": "boolean",
+            "const": false,
+            "description": "For polls, is_correct is always false."
+          },
+          "order_index": {
+            "type": "integer"
+          }
+        },
+        "required": ["id", "text", "is_correct", "order_index"]
+      }
+    }
+  },
+  "required": [
+    "id",
+    "quiz_id",
+    "text",
+    "type",
+    "order_index",
+    "options"
+  ]
+}

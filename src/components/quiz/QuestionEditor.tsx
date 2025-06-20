@@ -1,28 +1,22 @@
 import React, { useState } from 'react';
-import { Plus, Trash2, GripVertical, Image, Clock, Crown, Lock } from 'lucide-react';
+import { Trash2, GripVertical, Image, Clock, Crown } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/Card';
 import { SubscriptionGate } from '../subscription/SubscriptionGate';
-import { QuestionType, MatchingPair, FillInBlank, BlankAnswer, SubscriptionTier } from '../../types';
+import { Question, QuestionType, SubscriptionTier } from '../../types';
 import { useNavigate } from 'react-router-dom';
-
-interface QuestionData {
-  text: string;
-  type: QuestionType;
-  options: string[];
-  correctOptions: number[];
-  imageUrl?: string;
-  timeLimit?: number;
-  matchingPairs?: MatchingPair[];
-  fillInBlanks?: FillInBlank[];
-  correctAnswer?: string;
-  acceptableAnswers?: string[];
-}
+import {
+  MultipleChoiceEditor,
+  TrueFalseEditor,
+  MatchingEditor,
+  FillInBlankEditor,
+  ShortAnswerEditor,
+} from './question-types';
 
 interface QuestionEditorProps {
-  question: QuestionData;
+  question: Question;
   questionIndex: number;
-  onUpdate: (field: keyof QuestionData, value: any) => void;
+  onUpdate: (field: keyof Question, value: Question[keyof Question]) => void;
   onRemove: () => void;
   userTier: SubscriptionTier;
   restrictedTypes: string[];
@@ -34,20 +28,18 @@ export const QuestionEditor: React.FC<QuestionEditorProps> = ({
   onUpdate,
   onRemove,
   userTier,
-  restrictedTypes
+  restrictedTypes,
 }) => {
   const [showAdvanced, setShowAdvanced] = useState(false);
   const navigate = useNavigate();
 
   const handleTypeChange = (newType: QuestionType) => {
-    // Check if type is restricted
     if (restrictedTypes.includes(newType)) {
-      return; // Don't change type if restricted
+      return;
     }
 
     onUpdate('type', newType);
     
-    // Reset type-specific fields
     switch (newType) {
       case 'MultipleChoice':
         onUpdate('options', ['', '', '', '']);
@@ -75,28 +67,27 @@ export const QuestionEditor: React.FC<QuestionEditorProps> = ({
         onUpdate('acceptableAnswers', []);
         break;
       case 'Essay':
-        // Essay questions don't need specific setup
         break;
     }
   };
 
   const updateOption = (optionIndex: number, value: string) => {
-    const newOptions = [...question.options];
-    newOptions[optionIndex] = value;
+    const newOptions = [...(question.options || [])];
+    newOptions[optionIndex] = { ...newOptions[optionIndex], text: value };
     onUpdate('options', newOptions);
   };
 
-  const toggleCorrectOption = (optionIndex: number) => {
-    const newCorrectOptions = [...question.correctOptions];
+  const toggleCorrectOption = (optionId: string) => {
+    const newCorrectOptionIds = [...(question.correctOptionIds || [])];
     
     if (question.type === 'MultipleChoice') {
-      if (newCorrectOptions.includes(optionIndex)) {
-        onUpdate('correctOptions', newCorrectOptions.filter(i => i !== optionIndex));
+      if (newCorrectOptionIds.includes(optionId)) {
+        onUpdate('correctOptionIds', newCorrectOptionIds.filter(id => id !== optionId));
       } else {
-        onUpdate('correctOptions', [...newCorrectOptions, optionIndex]);
+        onUpdate('correctOptionIds', [...newCorrectOptionIds, optionId]);
       }
     } else {
-      onUpdate('correctOptions', [optionIndex]);
+      onUpdate('correctOptionIds', [optionId]);
     }
   };
 
@@ -113,7 +104,7 @@ export const QuestionEditor: React.FC<QuestionEditorProps> = ({
   };
 
   const removeMatchingPair = (pairIndex: number) => {
-    const newPairs = question.matchingPairs?.filter((_, i) => i !== pairIndex) || [];
+    const newPairs = question.matchingPairs?.filter((_, i: number) => i !== pairIndex) || [];
     onUpdate('matchingPairs', newPairs);
   };
 
@@ -121,9 +112,8 @@ export const QuestionEditor: React.FC<QuestionEditorProps> = ({
     const fillInBlank = question.fillInBlanks?.[0] || { id: '1', text: '', blanks: [] };
     const updated = { ...fillInBlank, [field]: value };
     
-    // Auto-detect blanks in text
     const blankMatches = value.match(/\{\{blank\}\}/g) || [];
-    const blanks = blankMatches.map((_, index) => ({
+    const blanks = blankMatches.map((_, index: number) => ({
       id: (index + 1).toString(),
       position: index,
       correctAnswer: fillInBlank.blanks[index]?.correctAnswer || '',
@@ -157,7 +147,7 @@ export const QuestionEditor: React.FC<QuestionEditorProps> = ({
   };
 
   const removeAcceptableAnswer = (index: number) => {
-    const current = question.acceptableAnswers?.filter((_, i) => i !== index) || [];
+    const current = question.acceptableAnswers?.filter((_: string, i: number) => i !== index) || [];
     onUpdate('acceptableAnswers', current);
   };
 
@@ -169,7 +159,67 @@ export const QuestionEditor: React.FC<QuestionEditorProps> = ({
     </option>
   );
 
-  // If current question type is restricted, show upgrade gate
+  const renderQuestionEditor = () => {
+    switch (question.type) {
+      case 'MultipleChoice':
+        return (
+          <MultipleChoiceEditor
+            options={question.options || []}
+            correctOptionIds={question.correctOptionIds || []}
+            toggleCorrectOption={toggleCorrectOption}
+            updateOption={updateOption}
+          />
+        );
+      case 'TrueFalse':
+        return (
+          <TrueFalseEditor
+            options={question.options || []}
+            correctOptionIds={question.correctOptionIds || []}
+            toggleCorrectOption={toggleCorrectOption}
+          />
+        );
+      case 'Matching':
+        return (
+          <MatchingEditor
+            matchingPairs={question.matchingPairs || []}
+            updateMatchingPair={updateMatchingPair}
+            addMatchingPair={addMatchingPair}
+            removeMatchingPair={removeMatchingPair}
+          />
+        );
+      case 'FillInBlank':
+        return (
+          <FillInBlankEditor
+            fillInBlanks={question.fillInBlanks || []}
+            updateFillInBlank={updateFillInBlank}
+            updateBlankAnswer={updateBlankAnswer}
+          />
+        );
+      case 'ShortAnswer':
+        return (
+          <ShortAnswerEditor
+            correctAnswer={question.correctAnswer || ''}
+            acceptableAnswers={question.acceptableAnswers || []}
+            onUpdate={onUpdate}
+            addAcceptableAnswer={addAcceptableAnswer}
+            updateAcceptableAnswer={updateAcceptableAnswer}
+            removeAcceptableAnswer={removeAcceptableAnswer}
+          />
+        );
+      case 'Essay':
+        return (
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <p className="text-sm text-blue-800">
+              <strong>Essay Question:</strong> This question will be manually graded.
+              Students can write extended responses, and you'll need to review and score them individually.
+            </p>
+          </div>
+        );
+      default:
+        return null;
+    }
+  };
+
   if (isRestrictedType(question.type)) {
     return (
       <SubscriptionGate
@@ -199,46 +249,44 @@ export const QuestionEditor: React.FC<QuestionEditorProps> = ({
         </Button>
       </CardHeader>
       <CardContent className="space-y-4">
-        {/* Question Text */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Question Text *
           </label>
           <textarea
             value={question.text}
-            onChange={(e) => onUpdate('text', e.target.value)}
+            onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => onUpdate('text', e.target.value)}
             className="input min-h-[80px]"
             placeholder="Enter your question"
             required
           />
         </div>
 
-        {/* Question Type */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Question Type
           </label>
           <select
             value={question.type}
-            onChange={(e) => handleTypeChange(e.target.value as QuestionType)}
+            onChange={(e: React.ChangeEvent<HTMLSelectElement>) => handleTypeChange(e.target.value as QuestionType)}
             className="input"
             required
           >
             <option value="MultipleChoice">Multiple Choice</option>
             <option value="TrueFalse">True/False</option>
-            {isRestrictedType('Matching') ? 
+            {isRestrictedType('Matching') ?
               renderRestrictedTypeOption('Matching', 'Matching') :
               <option value="Matching">Matching</option>
             }
-            {isRestrictedType('FillInBlank') ? 
+            {isRestrictedType('FillInBlank') ?
               renderRestrictedTypeOption('FillInBlank', 'Fill in the Blank') :
               <option value="FillInBlank">Fill in the Blank</option>
             }
-            {isRestrictedType('ShortAnswer') ? 
+            {isRestrictedType('ShortAnswer') ?
               renderRestrictedTypeOption('ShortAnswer', 'Short Answer') :
               <option value="ShortAnswer">Short Answer</option>
             }
-            {isRestrictedType('Essay') ? 
+            {isRestrictedType('Essay') ?
               renderRestrictedTypeOption('Essay', 'Essay') :
               <option value="Essay">Essay</option>
             }
@@ -251,190 +299,7 @@ export const QuestionEditor: React.FC<QuestionEditorProps> = ({
           )}
         </div>
 
-        {/* Question Type Specific Content */}
-        {(question.type === 'MultipleChoice' || question.type === 'TrueFalse') && (
-          <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-700">
-              Options *
-            </label>
-            {question.options.map((option, optionIndex) => (
-              <div key={optionIndex} className="flex items-center space-x-2">
-                <input
-                  type={question.type === 'MultipleChoice' ? 'checkbox' : 'radio'}
-                  name={`question-${questionIndex}-correct`}
-                  checked={question.correctOptions.includes(optionIndex)}
-                  onChange={() => toggleCorrectOption(optionIndex)}
-                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                />
-                <input
-                  type="text"
-                  value={option}
-                  onChange={(e) => updateOption(optionIndex, e.target.value)}
-                  className="input"
-                  placeholder={`Option ${optionIndex + 1}`}
-                  required
-                  disabled={question.type === 'TrueFalse'}
-                />
-              </div>
-            ))}
-            <p className="text-xs text-gray-500">
-              Check the box next to correct answer(s)
-            </p>
-          </div>
-        )}
-
-        {question.type === 'Matching' && (
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <label className="block text-sm font-medium text-gray-700">
-                Matching Pairs *
-              </label>
-              <Button
-                type="button"
-                onClick={addMatchingPair}
-                variant="secondary"
-                size="sm"
-                icon={<Plus size={16} />}
-              >
-                Add Pair
-              </Button>
-            </div>
-            {question.matchingPairs?.map((pair, pairIndex) => (
-              <div key={pair.id} className="flex items-center space-x-2">
-                <input
-                  type="text"
-                  value={pair.left}
-                  onChange={(e) => updateMatchingPair(pairIndex, 'left', e.target.value)}
-                  className="input flex-1"
-                  placeholder="Left side"
-                  required
-                />
-                <span className="text-gray-400">↔</span>
-                <input
-                  type="text"
-                  value={pair.right}
-                  onChange={(e) => updateMatchingPair(pairIndex, 'right', e.target.value)}
-                  className="input flex-1"
-                  placeholder="Right side"
-                  required
-                />
-                {question.matchingPairs!.length > 2 && (
-                  <Button
-                    type="button"
-                    onClick={() => removeMatchingPair(pairIndex)}
-                    variant="ghost"
-                    size="sm"
-                    icon={<Trash2 size={16} />}
-                  />
-                )}
-              </div>
-            ))}
-            <p className="text-xs text-gray-500">
-              Students will drag items from the left to match with items on the right
-            </p>
-          </div>
-        )}
-
-        {question.type === 'FillInBlank' && (
-          <div className="space-y-3">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Text with Blanks *
-              </label>
-              <textarea
-                value={question.fillInBlanks?.[0]?.text || ''}
-                onChange={(e) => updateFillInBlank('text', e.target.value)}
-                className="input min-h-[80px]"
-                placeholder="Enter text with {{blank}} markers where students should fill in answers"
-                required
-              />
-              <p className="text-xs text-gray-500 mt-1">
-                Use {`{{blank}}`} to mark where students should fill in answers
-              </p>
-            </div>
-            
-            {question.fillInBlanks?.[0]?.blanks.map((blank, blankIndex) => (
-              <div key={blank.id} className="border border-gray-200 rounded p-3">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Blank {blankIndex + 1} - Correct Answer *
-                </label>
-                <input
-                  type="text"
-                  value={blank.correctAnswer}
-                  onChange={(e) => updateBlankAnswer(blankIndex, 'correctAnswer', e.target.value)}
-                  className="input"
-                  placeholder="Enter the correct answer"
-                  required
-                />
-              </div>
-            ))}
-          </div>
-        )}
-
-        {question.type === 'ShortAnswer' && (
-          <div className="space-y-3">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Correct Answer *
-              </label>
-              <input
-                type="text"
-                value={question.correctAnswer || ''}
-                onChange={(e) => onUpdate('correctAnswer', e.target.value)}
-                className="input"
-                placeholder="Enter the correct answer"
-                required
-              />
-            </div>
-            
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <label className="block text-sm font-medium text-gray-700">
-                  Alternative Acceptable Answers
-                </label>
-                <Button
-                  type="button"
-                  onClick={addAcceptableAnswer}
-                  variant="secondary"
-                  size="sm"
-                  icon={<Plus size={16} />}
-                >
-                  Add Alternative
-                </Button>
-              </div>
-              {question.acceptableAnswers?.map((answer, index) => (
-                <div key={index} className="flex items-center space-x-2 mb-2">
-                  <input
-                    type="text"
-                    value={answer}
-                    onChange={(e) => updateAcceptableAnswer(index, e.target.value)}
-                    className="input flex-1"
-                    placeholder="Alternative correct answer"
-                  />
-                  <Button
-                    type="button"
-                    onClick={() => removeAcceptableAnswer(index)}
-                    variant="ghost"
-                    size="sm"
-                    icon={<Trash2 size={16} />}
-                  />
-                </div>
-              ))}
-              <p className="text-xs text-gray-500">
-                Add alternative spellings or phrasings that should be accepted as correct
-              </p>
-            </div>
-          </div>
-        )}
-
-        {question.type === 'Essay' && (
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <p className="text-sm text-blue-800">
-              <strong>Essay Question:</strong> This question will be manually graded. 
-              Students can write extended responses, and you'll need to review and score them individually.
-            </p>
-          </div>
-        )}
+        {renderQuestionEditor()}
 
         {/* Advanced Options */}
         <div className="border-t border-gray-200 pt-4">
@@ -457,7 +322,7 @@ export const QuestionEditor: React.FC<QuestionEditorProps> = ({
                     <input
                       type="url"
                       value={question.imageUrl || ''}
-                      onChange={(e) => onUpdate('imageUrl', e.target.value)}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => onUpdate('imageUrl', e.target.value)}
                       className="input flex-1"
                       placeholder="https://example.com/image.jpg"
                     />
@@ -484,7 +349,7 @@ export const QuestionEditor: React.FC<QuestionEditorProps> = ({
                     <input
                       type="number"
                       value={question.timeLimit || ''}
-                      onChange={(e) => onUpdate('timeLimit', e.target.value ? parseInt(e.target.value) : undefined)}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => onUpdate('timeLimit', e.target.value ? parseInt(e.target.value) : undefined)}
                       className="input flex-1"
                       placeholder="No limit"
                       min="10"

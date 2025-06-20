@@ -1,0 +1,34 @@
+# Project Summary: Quiz Connect
+
+**Quiz Connect** is a modern, full-stack web application designed for creating, sharing, and taking quizzes. It's built with a robust and scalable technology stack, featuring a React-based frontend and a Supabase backend. The application is feature-rich, with a strong emphasis on user interaction and community-driven content.
+
+### Key Features:
+
+*   **User Authentication and Profiles**: The application provides a complete authentication system, allowing users to register, log in, and manage their profiles. User profiles can include a bio, an avatar, and privacy settings, fostering a sense of identity and community.
+*   **Comprehensive Quiz Creation**: Authenticated users can create detailed and interactive quizzes. The quiz editor allows for the configuration of titles, descriptions, categories, difficulty levels, time limits, and passing thresholds, providing a high degree of customization.
+*   **Interactive Quiz-Taking Experience**: Users can browse and take quizzes created by others. The application tracks quiz attempts, scores, and the time taken, offering a dynamic and engaging experience for learners and quiz enthusiasts.
+*   **Social and Community Features**: Quiz Connect includes a variety of social features to encourage user interaction. Users can follow each other, like their favorite quizzes, and leave comments, creating a vibrant and collaborative community around the content.
+*   **Detailed Statistics and Analytics**: The application tracks and displays a wide range of statistics for both users and quizzes. User stats include the number of quizzes created and taken, average scores, and follower/following counts. Quiz stats cover metrics like the number of times a quiz has been played, its average score, and the number of likes it has received.
+*   **Quiz Templates and Subscription Tiers**: The presence of a template library and pricing pages suggests that the application offers pre-built quiz templates to streamline the creation process. It also likely provides different subscription plans, which may unlock advanced features, premium content, or higher usage limits.
+
+### Technology Stack:
+
+*   **Frontend**: The application is built with **React** and **TypeScript**, ensuring a type-safe and maintainable codebase. **Vite** is used as the build tool, providing a fast and efficient development experience. The user interface is styled with **Tailwind CSS**, allowing for rapid and consistent design.
+*   **Backend**: The backend is powered by **Supabase**, which provides a suite of tools for authentication, database management, and storage. This choice allows for a streamlined development process, with a focus on building features rather than managing infrastructure.
+*   **Database**: The application uses a **PostgreSQL** database, managed by Supabase. The database schema is defined and managed with **Drizzle ORM**, a TypeScript ORM that provides a type-safe and intuitive way to interact with the database.
+*   **Routing and State Management**: **React Router** is used for client-side routing, enabling a smooth and responsive single-page application experience. **Zustand** is employed for state management, offering a lightweight and flexible solution for managing application state.
+
+### Architecture Overview
+
+The project follows a standard client-server architecture, with a clear separation of concerns:
+
+*   **`src/pages`**: Contains the top-level components for each route in the application.
+*   **`src/components`**: Houses reusable UI components, organized by feature (e.g., `quiz`, `auth`, `subscription`).
+*   **`src/layouts`**: Defines the overall structure of the application's pages (e.g., `MainLayout`, `AuthLayout`).
+*   **`src/contexts`**: Manages global state and provides application-wide functionality, such as authentication and toast notifications.
+*   **`src/hooks`**: Includes custom React hooks for fetching and managing data (e.g., `useQuizzes`).
+*   **`src/lib`**: Contains core logic and third-party integrations, including Supabase client configuration and database service definitions.
+*   **`src/db`**: Defines the database schema using Drizzle ORM.
+*   **`supabase/migrations`**: Stores the SQL migration files that track changes to the database schema over time.
+
+This structure promotes modularity and maintainability, making it easier to scale the application and add new features in the future.
