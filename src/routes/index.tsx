@@ -11,6 +11,7 @@ const Login = lazy(() => import('../pages/auth/Login'));
 const Register = lazy(() => import('../pages/auth/Register'));
 const ForgotPassword = lazy(() => import('../pages/auth/ForgotPassword'));
 const ResetPassword = lazy(() => import('../pages/auth/ResetPassword'));
+const PendingVerification = lazy(() => import('../pages/auth/PendingVerification'));
 const Dashboard = lazy(() => import('../pages/Dashboard'));
 const CreateQuiz = lazy(() => import('../pages/quizzes/CreateQuiz'));
 const BrowseQuizzes = lazy(() => import('../pages/quizzes/BrowseQuizzes'));
@@ -56,6 +57,7 @@ export const AppRoutes = () => {
           <Route path="register" element={<Register />} />
           <Route path="forgot-password" element={<ForgotPassword />} />
           <Route path="reset-password" element={<ResetPassword />} />
+          <Route path="pending-verification" element={<PendingVerification />} />
         </Route>
 
         {/* Fallback routes */}

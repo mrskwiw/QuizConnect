@@ -1,5 +1,5 @@
 import { supabase } from './supabase';
-import { Quiz, QuizAnswer, Comment } from '../types';
+import { User, Quiz, QuizAnswer, Comment } from '../types';
 
 export const quizService = {
   async getQuizzes(options: { category?: string; difficulty?: string; search?: string; authorId?: string; limit?: number; }) {
@@ -106,6 +106,26 @@ export const socialService = {
 
   async addComment(quizId: string, text: string) {
     const { data, error } = await supabase.from('comments').insert({ quiz_id: quizId, text });
+    if (error) throw error;
+    return data;
+  },
+};
+export const userService = {
+  async getProfile(userId: string) {
+    const { data, error } = await supabase
+      .from('users')
+      .select('*, stats:user_stats(*)')
+      .eq('id', userId)
+      .single();
+    if (error) throw error;
+    return data;
+  },
+
+  async updateProfile(userId: string, updates: Partial<User>) {
+    const { data, error } = await supabase
+      .from('users')
+      .update(updates)
+      .eq('id', userId);
     if (error) throw error;
     return data;
   },

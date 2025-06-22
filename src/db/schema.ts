@@ -12,15 +12,23 @@ import {
 
 // Users table
 export const users = pgTable('users', {
-  id: uuid('id').defaultRandom().primaryKey(),
+  id: uuid('id').primaryKey().references(() => authUsers.id),
   username: text('username').notNull().unique(),
   email: text('email').notNull().unique(),
-  passwordHash: text('password_hash').notNull(),
   avatarUrl: text('avatar_url'),
   bio: text('bio'),
   isPrivate: boolean('is_private').default(false),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull()
+});
+
+// This is a reference to the auth.users table in Supabase
+export const authUsers = pgTable('users', {
+  id: uuid('id').primaryKey(),
+}, () => {
+  return {
+    tableName: 'auth.users',
+  }
 });
 
 // User stats table

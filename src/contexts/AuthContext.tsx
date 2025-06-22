@@ -138,60 +138,28 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (signUpError) throw signUpError;
       if (!authUser?.id) throw new Error('No user ID returned from signup');
 
-      // Create the user profile in our users table
-      const { error: profileError } = await supabase
-        .from('users')
-        .insert({
-          id: authUser.id,
-          username: username,
-          email: email,
-          subscription_tier: 'free',
-          subscription_status: 'active'
-        });
-
-      if (profileError) {
-        // If profile creation fails, we should clean up the auth user
-        console.error('Profile creation error:', profileError);
-        throw new Error('Failed to create user profile');
-      }
-
-      // Create initial user stats
-      const { error: statsError } = await supabase
-        .from('user_stats')
-        .insert({
-          user_id: authUser.id,
-          quizzes_created: 0,
-          quizzes_taken: 0,
-          average_score: 0,
-          total_points: 0,
-          lifetime_points: 0,
-          weekly_points: 0,
-          followers: 0,
-          following: 0
-        });
-
-      if (statsError) {
-        console.error('Stats creation error:', statsError);
-        // Don't throw here as the user is created, just log the error
-      }
-
       showToast('Registration successful! Please check your email to verify your account.', 'success');
-    } catch (error: any) {
+    } catch (error) {
       console.error('Registration error:', error);
       
+      let errorMessage = 'Registration failed. Please try again.';
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+
       // Provide more specific error messages
-      if (error.message?.includes('duplicate key value violates unique constraint')) {
-        if (error.message.includes('users_email_key')) {
+      if (errorMessage.includes('duplicate key value violates unique constraint')) {
+        if (errorMessage.includes('users_email_key')) {
           showToast('An account with this email already exists.', 'error');
-        } else if (error.message.includes('users_username_key')) {
+        } else if (errorMessage.includes('users_username_key')) {
           showToast('This username is already taken. Please choose another.', 'error');
         } else {
           showToast('An account with these details already exists.', 'error');
         }
-      } else if (error.message?.includes('Password should be at least 6 characters')) {
+      } else if (errorMessage.includes('Password should be at least 6 characters')) {
         showToast('Password must be at least 6 characters long.', 'error');
       } else {
-        showToast(error.message || 'Registration failed. Please try again.', 'error');
+        showToast(errorMessage, 'error');
       }
       throw error;
     } finally {
