@@ -6,7 +6,7 @@ import { Card, CardContent } from '../../components/ui/Card';
 import { LoadingSpinner } from '../../components/ui/LoadingSpinner';
 import { QuestionRenderer } from '../../components/quiz/QuestionRenderer';
 import { useQuiz } from '../../hooks/useQuizzes';
-import { useAuth } from '../../contexts/AuthContext';
+import { useAuth } from '../../hooks/useAuth';
 import { quizService } from '../../lib/database';
 import { useToast } from '../../contexts/ToastContext';
 import { QuizAnswer, QuizResult } from '../../types';

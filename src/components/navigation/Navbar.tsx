@@ -1,8 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Brain, User, Search, Menu, X, LogOut, Plus, BarChart2, Sparkles, Crown, CreditCard } from 'lucide-react';
-import { useAuth } from '../../contexts/AuthContext';
-import { Button } from '../ui/Button';
+import { useAuth } from '../../hooks/useAuth';
 
 export const Navbar = () => {
   const { user, isAuthenticated, logout } = useAuth();
@@ -30,7 +29,8 @@ export const Navbar = () => {
     
     const badgeConfig = {
       pro: { icon: Sparkles, color: 'text-blue-600', bg: 'bg-blue-100' },
-      premium: { icon: Crown, color: 'text-purple-600', bg: 'bg-purple-100' }
+      premium: { icon: Crown, color: 'text-purple-600', bg: 'bg-purple-100' },
+      admin: { icon: Crown, color: 'text-red-600', bg: 'bg-red-100' }
     };
     
     const config = badgeConfig[tier];

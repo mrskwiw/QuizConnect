@@ -4,7 +4,7 @@ import { Crown, Zap, Star, ArrowLeft } from 'lucide-react';
 import { Card, CardContent } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { PricingPlans } from '../../components/subscription/PricingPlans';
-import { useAuth } from '../../contexts/AuthContext';
+import { useAuth } from '../../hooks/useAuth';
 import { useToast } from '../../contexts/ToastContext';
 import { SubscriptionTier } from '../../types';
 

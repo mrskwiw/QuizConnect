@@ -4,7 +4,7 @@ import { Button } from '../../components/ui/Button';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/Card';
 import { LoadingSpinner } from '../../components/ui/LoadingSpinner';
 import { useQuiz } from '../../hooks/useQuizzes';
-import { useAuth } from '../../contexts/AuthContext';
+import { useAuth } from '../../hooks/useAuth';
 import { useToast } from '../../contexts/ToastContext';
 import { LikeButton } from '../../components/quiz/LikeButton';
 import { CommentSection } from '../../components/quiz/CommentSection';

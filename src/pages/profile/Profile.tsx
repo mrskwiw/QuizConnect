@@ -20,7 +20,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { LoadingSpinner } from '../../components/ui/LoadingSpinner';
-import { useAuth } from '../../contexts/AuthContext';
+import { useAuth } from '../../hooks/useAuth';
 import { userService, badgeService } from '../../lib/database';
 import { User as UserType, UserBadge, UserAchievement, BadgeRarity } from '../../types';
 
@@ -90,7 +90,7 @@ export default function Profile() {
   const isOwnProfile = currentUser?.id === user.id;
 
   const getBadgeIcon = (iconName: string) => {
-    const iconMap: Record<string, React.ComponentType<any>> = {
+    const iconMap: Record<string, React.ElementType> = {
       BookOpen,
       Crown,
       Trophy,
@@ -109,7 +109,7 @@ export default function Profile() {
   };
 
   const getAchievementIcon = (iconName: string) => {
-    const iconMap: Record<string, React.ComponentType<any>> = {
+    const iconMap: Record<string, React.ElementType> = {
       UserCheck: User,
       PlusCircle: BookOpen,
       CheckCircle: Target,
@@ -241,7 +241,7 @@ export default function Profile() {
           ].map(({ id, label, icon: Icon }) => (
             <button
               key={id}
-              onClick={() => setActiveTab(id as any)}
+              onClick={() => setActiveTab(id as 'overview' | 'badges' | 'achievements')}
               className={`flex items-center py-2 px-1 border-b-2 font-medium text-sm ${
                 activeTab === id
                   ? 'border-blue-500 text-blue-600'

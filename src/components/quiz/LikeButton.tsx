@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ThumbsUp } from 'lucide-react';
 import { Button } from '../ui/Button';
-import { useAuth } from '../../contexts/AuthContext';
+import { useAuth } from '../../hooks/useAuth';
 import { useToast } from '../../contexts/ToastContext';
 import { socialService } from '../../lib/database';
 import { supabase } from '../../lib/supabase';

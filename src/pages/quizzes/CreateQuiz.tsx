@@ -8,7 +8,7 @@ import { SubscriptionGate } from '../../components/subscription/SubscriptionGate
 import { QuizCategory, QuizDifficulty, QuestionType, QuizTemplate, QuizVisibility } from '../../types';
 import { quizService } from '../../lib/database';
 import { useToast } from '../../contexts/ToastContext';
-import { useAuth } from '../../contexts/AuthContext';
+import { useAuth } from '../../hooks/useAuth';
 import { 
   getQuestionLimit, 
   canCreateQuiz, 
@@ -127,9 +127,9 @@ const CreateQuiz = () => {
     setQuestions(questions.filter((_, i) => i !== index));
   };
 
-  const updateQuestion = (index: number, field: keyof QuestionData, value: any) => {
+  const updateQuestion = (index: number, field: keyof QuestionData, value: QuestionData[keyof QuestionData]) => {
     // Check if trying to use restricted question type
-    if (field === 'type' && restrictedQuestionTypes.includes(value)) {
+    if (field === 'type' && typeof value === 'string' && restrictedQuestionTypes.includes(value)) {
       showToast(getUpgradeMessage('Advanced question types', 'pro'), 'warning');
       return;
     }
