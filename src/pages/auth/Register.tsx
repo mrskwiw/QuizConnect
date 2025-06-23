@@ -39,12 +39,7 @@ const Register = () => {
         errorMessage = err.message;
       }
       
-      // Map technical error messages to user-friendly ones
-      const userFriendlyMessage = errorMessage.includes('already registered')
-        ? 'An account with this email already exists. Please try logging in instead.'
-        : errorMessage;
-      
-      setError(userFriendlyMessage);
+      setError(errorMessage);
     } finally {
       setIsLoading(false);
     }

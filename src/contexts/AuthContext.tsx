@@ -104,7 +104,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (error) throw error;
       showToast('Successfully logged in', 'success');
     } catch (error) {
-      showToast('Login failed. Please try again.', 'error');
+      let errorMessage = 'Login failed. Please try again.';
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+
+      if (errorMessage.includes('Invalid login credentials')) {
+        showToast('Invalid email or password. Please try again.', 'error');
+      } else if (errorMessage.includes('Email not confirmed')) {
+        showToast('Please verify your email before logging in.', 'error');
+      } else {
+        showToast(errorMessage, 'error');
+      }
       throw error;
     } finally {
       setIsLoading(false);
@@ -148,14 +159,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
 
       // Provide more specific error messages
-      if (errorMessage.includes('duplicate key value violates unique constraint')) {
-        if (errorMessage.includes('users_email_key')) {
-          showToast('An account with this email already exists.', 'error');
-        } else if (errorMessage.includes('users_username_key')) {
-          showToast('This username is already taken. Please choose another.', 'error');
-        } else {
-          showToast('An account with these details already exists.', 'error');
-        }
+      if (errorMessage.includes('User already registered')) {
+        showToast('An account with this email already exists. Please try logging in.', 'error');
+      } else if (errorMessage.includes('duplicate key value violates unique constraint "users_username_key"')) {
+        showToast('This username is already taken. Please choose another.', 'error');
       } else if (errorMessage.includes('Password should be at least 6 characters')) {
         showToast('Password must be at least 6 characters long.', 'error');
       } else {
