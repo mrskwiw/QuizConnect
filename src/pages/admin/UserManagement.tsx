@@ -3,14 +3,16 @@ import { supabase } from '../../lib/supabase';
 import { Button } from '../../components/ui/Button';
 import { useToast } from '../../contexts/ToastContext';
 import { useAuth } from '../../hooks/useAuth';
+import { SubscriptionTier } from '../../types';
 
 const UserManagement = () => {
   const [username, setUsername] = useState('');
+  const [tier, setTier] = useState<SubscriptionTier>('free');
   const [isLoading, setIsLoading] = useState(false);
   const { showToast } = useToast();
   const { user } = useAuth();
 
-  const handlePromote = async () => {
+  const handleSetTier = async () => {
     if (!username) {
       showToast('Please enter a username.', 'error');
       return;
@@ -35,20 +37,21 @@ const UserManagement = () => {
       const targetUserId = users[0].id;
 
       // Call the secure database function
-      const { error: rpcError } = await supabase.rpc('promote_user_to_premium', {
+      const { error: rpcError } = await supabase.rpc('set_user_subscription_tier', {
         target_user_id: targetUserId,
+        new_tier: tier,
       });
 
       if (rpcError) throw rpcError;
 
-      showToast(`Successfully promoted user "${username}" to the premium tier.`, 'success');
+      showToast(`Successfully set user "${username}" to the ${tier} tier.`, 'success');
       setUsername('');
     } catch (error) {
       let errorMessage = 'An error occurred.';
       if (error instanceof Error) {
         errorMessage = error.message;
       }
-      console.error('Error promoting user:', error);
+      console.error('Error setting user tier:', error);
       showToast(errorMessage, 'error');
     } finally {
       setIsLoading(false);
@@ -68,17 +71,27 @@ const UserManagement = () => {
     <div className="max-w-2xl mx-auto">
       <h1 className="text-2xl font-bold mb-6">User Management</h1>
       <div className="bg-white p-6 rounded-lg shadow">
-        <h2 className="text-lg font-semibold mb-4">Promote User to Premium</h2>
-        <div className="flex gap-4">
+        <h2 className="text-lg font-semibold mb-4">Set User Subscription Tier</h2>
+        <div className="flex flex-col gap-4">
           <input
             type="text"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
-            placeholder="Enter username to promote"
-            className="input flex-grow"
+            placeholder="Enter username"
+            className="input"
           />
-          <Button onClick={handlePromote} isLoading={isLoading}>
-            Promote
+          <select
+            value={tier}
+            onChange={(e) => setTier(e.target.value as SubscriptionTier)}
+            className="input"
+          >
+            <option value="free">Free</option>
+            <option value="pro">Pro</option>
+            <option value="premium">Premium</option>
+            <option value="admin">Admin</option>
+          </select>
+          <Button onClick={handleSetTier} isLoading={isLoading}>
+            Set Tier
           </Button>
         </div>
       </div>
