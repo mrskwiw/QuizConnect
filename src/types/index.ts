@@ -21,7 +21,7 @@ export interface UserSubscription {
   stripeSubscriptionId?: string;
 }
 
-export type SubscriptionTier = 'free' | 'pro' | 'premium';
+export type SubscriptionTier = 'free' | 'pro' | 'premium' | 'admin';
 export type SubscriptionStatus = 'active' | 'canceled' | 'past_due' | 'incomplete' | 'trialing';
 
 export interface SubscriptionPlan {
@@ -265,7 +265,7 @@ export interface Badge {
   icon: string;
   color: string;
   rarity: BadgeRarity;
-  requirements: Record<string, any>;
+  requirements: Record<string, unknown>;
   isActive: boolean;
   createdAt: string;
 }
@@ -275,7 +275,7 @@ export interface UserBadge {
   userId: string;
   badgeId: string;
   earnedAt: string;
-  progress: Record<string, any>;
+  progress: Record<string, unknown>;
   badge: Badge;
 }
 
@@ -287,7 +287,7 @@ export interface Achievement {
   category: AchievementCategory;
   pointsReward: number;
   badgeReward?: string;
-  requirements: Record<string, any>;
+  requirements: Record<string, unknown>;
   isActive: boolean;
   createdAt: string;
 }
@@ -297,7 +297,7 @@ export interface UserAchievement {
   userId: string;
   achievementId: string;
   unlockedAt: string;
-  progress: Record<string, any>;
+  progress: Record<string, unknown>;
   achievement: Achievement;
 }
 

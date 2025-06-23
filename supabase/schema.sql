@@ -488,7 +488,7 @@ BEGIN
   WHERE id = auth.uid();
 
   -- Only allow premium users (admins) to execute this
-  IF caller_subscription_tier = 'premium' THEN
+  IF caller_subscription_tier = 'admin' THEN
     UPDATE public.users
     SET 
       subscription_tier = 'premium',

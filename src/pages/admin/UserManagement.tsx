@@ -55,7 +55,7 @@ const UserManagement = () => {
     }
   };
 
-  if (user?.subscription.tier !== 'premium') {
+  if (user?.subscription.tier !== 'admin') {
     return (
       <div className="text-center py-12">
         <h2 className="text-2xl font-bold mb-4">Access Denied</h2>
