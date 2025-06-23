@@ -1,6 +1,5 @@
 // This script promotes a user to the 'premium' subscription tier.
-// It first checks if the user running the script is an admin.
-// Usage: node scripts/promote-to-premium.js <admin-username> <username-to-promote>
+// Usage: node scripts/promote-to-premium.js <username-to-promote>
 
 import { createClient } from '@supabase/supabase-js';
 import * as dotenv from 'dotenv';
@@ -17,26 +16,13 @@ if (!supabaseUrl || !supabaseServiceKey) {
 
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-const promoteUser = async (adminUsername, usernameToPromote) => {
-  if (!adminUsername || !usernameToPromote) {
-    console.error('Please provide both an admin username and a username to promote.');
+const promoteUser = async (usernameToPromote) => {
+  if (!usernameToPromote) {
+    console.error('Please provide a username to promote.');
     process.exit(1);
   }
 
   try {
-    // Check if the user running the script is an admin
-    const { data: adminUser, error: adminError } = await supabase
-      .from('users')
-      .select('subscription_tier')
-      .eq('username', adminUsername)
-      .single();
-
-    if (adminError) throw adminError;
-    if (!adminUser || adminUser.subscription_tier !== 'premium') {
-      console.error(`User "${adminUsername}" is not an admin and cannot perform this action.`);
-      return;
-    }
-
     // Find the user to promote
     const { data: users, error: findError } = await supabase
       .from('users')
@@ -65,6 +51,5 @@ const promoteUser = async (adminUsername, usernameToPromote) => {
   }
 };
 
-const adminUsername = process.argv[2];
-const usernameToPromote = process.argv[3];
-promoteUser(adminUsername, usernameToPromote);
+const usernameToPromote = process.argv[2];
+promoteUser(usernameToPromote);
