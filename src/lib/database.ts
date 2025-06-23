@@ -129,6 +129,15 @@ export const userService = {
     if (error) throw error;
     return data;
   },
+
+  async searchUsers(username: string) {
+    const { data, error } = await supabase
+      .from('users')
+      .select('*, stats:user_stats(*)')
+      .ilike('username', `%${username}%`);
+    if (error) throw error;
+    return data;
+  },
 };
 export const templateService = {
   async getTemplates() {
@@ -139,6 +148,25 @@ export const templateService = {
 
   async incrementUsage(templateId: string) {
     const { data, error } = await supabase.rpc('increment_template_usage', { template_id: templateId });
+    if (error) throw error;
+    return data;
+  },
+};
+export const badgeService = {
+  async getUserBadges(userId: string) {
+    const { data, error } = await supabase
+      .from('user_badges')
+      .select('*, badge:badges(*)')
+      .eq('user_id', userId);
+    if (error) throw error;
+    return data;
+  },
+
+  async getUserAchievements(userId: string) {
+    const { data, error } = await supabase
+      .from('user_achievements')
+      .select('*, achievement:achievements(*)')
+      .eq('user_id', userId);
     if (error) throw error;
     return data;
   },
