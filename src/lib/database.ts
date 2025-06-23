@@ -130,3 +130,16 @@ export const userService = {
     return data;
   },
 };
+export const templateService = {
+  async getTemplates() {
+    const { data, error } = await supabase.from('quiz_templates').select('*');
+    if (error) throw error;
+    return data;
+  },
+
+  async incrementUsage(templateId: string) {
+    const { data, error } = await supabase.rpc('increment_template_usage', { template_id: templateId });
+    if (error) throw error;
+    return data;
+  },
+};
