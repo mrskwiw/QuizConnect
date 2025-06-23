@@ -98,8 +98,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       throw new Error('Authentication not configured');
     }
 
+    setIsLoading(true);
     try {
-      setIsLoading(true);
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) throw error;
       showToast('Successfully logged in', 'success');
@@ -113,8 +113,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         showToast('Invalid email or password. Please try again.', 'error');
       } else if (errorMessage.includes('Email not confirmed')) {
         showToast('Please verify your email before logging in.', 'error');
+      } else if (errorMessage.includes('network')) {
+        showToast('A network error occurred. Please check your connection and try again.', 'error');
       } else {
-        showToast(errorMessage, 'error');
+        showToast('An unexpected error occurred. Please try again later.', 'error');
       }
       throw error;
     } finally {
