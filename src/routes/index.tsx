@@ -25,6 +25,7 @@ const Pricing = lazy(() => import('../pages/subscription/Pricing'));
 const Feed = lazy(() => import('../pages/Feed'));
 const Leaderboard = lazy(() => import('../pages/Leaderboard'));
 const NotFound = lazy(() => import('../pages/NotFound'));
+const UserManagement = lazy(() => import('../pages/admin/UserManagement'));
 
 export const AppRoutes = () => {
   return (
@@ -48,6 +49,7 @@ export const AppRoutes = () => {
             <Route path="profile/:username" element={<UserProfile />} />
             <Route path="profile/me" element={<Profile />} />
             <Route path="profile/edit" element={<EditProfile />} />
+            <Route path="admin/user-management" element={<UserManagement />} />
           </Route>
         </Route>
 

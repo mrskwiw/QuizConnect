@@ -477,3 +477,25 @@ CREATE INDEX IF NOT EXISTS idx_user_point_history_source ON user_point_history(s
 CREATE INDEX IF NOT EXISTS idx_subscription_usage_user_type ON subscription_usage(user_id, usage_type);
 CREATE INDEX IF NOT EXISTS idx_community_members_community_id ON community_members(community_id);
 CREATE INDEX IF NOT EXISTS idx_community_members_user_id ON community_members(user_id);
+CREATE OR REPLACE FUNCTION promote_user_to_premium(target_user_id uuid)
+RETURNS void LANGUAGE plpgsql SECURITY DEFINER AS $$
+DECLARE
+  caller_subscription_tier text;
+BEGIN
+  -- Get the subscription tier of the user calling this function
+  SELECT subscription_tier INTO caller_subscription_tier
+  FROM public.users
+  WHERE id = auth.uid();
+
+  -- Only allow premium users (admins) to execute this
+  IF caller_subscription_tier = 'premium' THEN
+    UPDATE public.users
+    SET 
+      subscription_tier = 'premium',
+      subscription_status = 'active'
+    WHERE id = target_user_id;
+  ELSE
+    RAISE EXCEPTION 'You do not have permission to perform this action.';
+  END IF;
+END;
+$$;
