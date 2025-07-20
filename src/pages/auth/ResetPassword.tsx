@@ -32,8 +32,9 @@ const ResetPassword = () => {
           showToast('Invalid or expired recovery link', 'error');
           navigate('/login');
         }
-      } catch (err) {
-        showToast('Failed to verify recovery link', 'error');
+      } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : 'Failed to verify recovery link';
+        showToast(message, 'error');
         navigate('/login');
       }
     };
@@ -59,12 +60,19 @@ const ResetPassword = () => {
       setIsLoading(true);
       const { error } = await supabase.auth.updateUser({ password });
 
-      if (error) throw error;
-
-      showToast('Password has been successfully reset', 'success');
-      navigate('/login');
-    } catch (err: any) {
-      setError(err.message || 'Failed to reset password. Please try again.');
+      if (error) {
+        console.error('Supabase password update error:', error);
+        setError(error.message || 'Failed to reset password. Please try again.');
+        showToast(error.message || 'Failed to reset password', 'error');
+      } else {
+        showToast('Password has been successfully reset', 'success');
+        navigate('/login');
+      }
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'An unexpected error occurred. Please try again.';
+      console.error('Unexpected error during password reset:', err);
+      setError(message);
+      showToast(message, 'error');
     } finally {
       setIsLoading(false);
     }

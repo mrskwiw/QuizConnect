@@ -182,6 +182,14 @@ CREATE TABLE IF NOT EXISTS user_point_history (
   week_start_date date DEFAULT date_trunc('week', CURRENT_DATE)::date
 );
 
+CREATE TABLE IF NOT EXISTS user_blocks (
+  blocker_id uuid REFERENCES users(id) ON DELETE CASCADE NOT NULL,
+  blocked_id uuid REFERENCES users(id) ON DELETE CASCADE NOT NULL,
+  created_at timestamptz DEFAULT now(),
+  PRIMARY KEY (blocker_id, blocked_id),
+  CHECK (blocker_id != blocked_id)
+);
+
 -- Section 3: Subscription and Community Tables
 
 CREATE TABLE IF NOT EXISTS subscription_plans (
@@ -442,9 +450,16 @@ ALTER TABLE subscription_plans ENABLE ROW LEVEL SECURITY;
 ALTER TABLE subscription_usage ENABLE ROW LEVEL SECURITY;
 ALTER TABLE communities ENABLE ROW LEVEL SECURITY;
 ALTER TABLE community_members ENABLE ROW LEVEL SECURITY;
+ALTER TABLE user_blocks ENABLE ROW LEVEL SECURITY;
 
 -- RLS Policies
-CREATE POLICY "Users can read all public profiles" ON users FOR SELECT TO authenticated USING (NOT is_private OR auth.uid() = id);
+CREATE POLICY "Users can read all public profiles" ON users FOR SELECT TO authenticated USING (
+  (NOT is_private OR auth.uid() = id) AND
+  NOT EXISTS (
+    SELECT 1 FROM user_blocks
+    WHERE (blocker_id = auth.uid() AND blocked_id = id) OR (blocker_id = id AND blocked_id = auth.uid())
+  )
+);
 CREATE POLICY "Users can read their own profile" ON users FOR SELECT TO authenticated USING (auth.uid() = id);
 CREATE POLICY "Users can update their own profile" ON users FOR UPDATE TO authenticated USING (auth.uid() = id) WITH CHECK (auth.uid() = id);
 CREATE POLICY "Users can insert their own profile" ON users FOR INSERT TO authenticated WITH CHECK (auth.uid() = id);
@@ -454,13 +469,34 @@ CREATE POLICY "Users can update their own stats" ON user_stats FOR UPDATE TO aut
 CREATE POLICY "Users can insert their own stats" ON user_stats FOR INSERT TO authenticated WITH CHECK (auth.uid() = user_id);
 
 CREATE POLICY "Anyone can read truly public quizzes" ON quizzes FOR SELECT TO public USING (is_public = true AND visibility = 'public');
-CREATE POLICY "Authenticated users can read subscriber quizzes" ON quizzes FOR SELECT TO authenticated USING ((is_public = true AND visibility = 'public') OR (is_public = true AND visibility = 'subscribers') OR (visibility = 'friends' AND EXISTS (SELECT 1 FROM user_follows WHERE follower_id = auth.uid() AND following_id = author_id)) OR (visibility = 'community' AND community_id IS NOT NULL AND EXISTS (SELECT 1 FROM community_members WHERE community_id = quizzes.community_id AND user_id = auth.uid())) OR (auth.uid() = author_id));
+CREATE POLICY "Authenticated users can read subscriber quizzes" ON quizzes FOR SELECT TO authenticated USING (
+  (
+    (is_public = true AND visibility = 'public') OR
+    (is_public = true AND visibility = 'subscribers') OR
+    (visibility = 'friends' AND EXISTS (SELECT 1 FROM user_follows WHERE follower_id = auth.uid() AND following_id = author_id)) OR
+    (visibility = 'community' AND community_id IS NOT NULL AND EXISTS (SELECT 1 FROM community_members WHERE community_id = quizzes.community_id AND user_id = auth.uid())) OR
+    (auth.uid() = author_id)
+  ) AND NOT EXISTS (
+    SELECT 1 FROM user_blocks
+    WHERE (blocker_id = auth.uid() AND blocked_id = quizzes.author_id) OR (blocker_id = quizzes.author_id AND blocked_id = auth.uid())
+  )
+);
 CREATE POLICY "Users can read their own quizzes" ON quizzes FOR SELECT TO authenticated USING (auth.uid() = author_id);
 CREATE POLICY "Users can create quizzes" ON quizzes FOR INSERT TO authenticated WITH CHECK (auth.uid() = author_id);
 CREATE POLICY "Users can update their own quizzes" ON quizzes FOR UPDATE TO authenticated USING (auth.uid() = author_id) WITH CHECK (auth.uid() = author_id);
 CREATE POLICY "Users can delete their own quizzes" ON quizzes FOR DELETE TO authenticated USING (auth.uid() = author_id);
 
--- ... (omitting other RLS policies for brevity, but they would be included here)
+CREATE POLICY "Users can view comments on quizzes they can see" ON comments FOR SELECT TO authenticated USING (
+    EXISTS (SELECT 1 FROM quizzes WHERE id = comments.quiz_id) AND
+    NOT EXISTS (SELECT 1 FROM user_blocks WHERE (blocker_id = auth.uid() AND blocked_id = comments.user_id) OR (blocker_id = comments.user_id AND blocked_id = auth.uid()))
+);
+CREATE POLICY "Users can create comments" ON comments FOR INSERT TO authenticated WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "Users can update their own comments" ON comments FOR UPDATE TO authenticated USING (auth.uid() = user_id);
+CREATE POLICY "Users can delete their own comments" ON comments FOR DELETE TO authenticated USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can block other users" ON user_blocks FOR INSERT TO authenticated WITH CHECK (auth.uid() = blocker_id);
+CREATE POLICY "Users can unblock users they have blocked" ON user_blocks FOR DELETE TO authenticated USING (auth.uid() = blocker_id);
+CREATE POLICY "Users can see their own blocks" ON user_blocks FOR SELECT TO authenticated USING (auth.uid() = blocker_id);
 
 -- Section 6: Indexes
 
@@ -500,3 +536,5 @@ CREATE INDEX IF NOT EXISTS idx_user_point_history_source ON user_point_history(s
 CREATE INDEX IF NOT EXISTS idx_subscription_usage_user_type ON subscription_usage(user_id, usage_type);
 CREATE INDEX IF NOT EXISTS idx_community_members_community_id ON community_members(community_id);
 CREATE INDEX IF NOT EXISTS idx_community_members_user_id ON community_members(user_id);
+CREATE INDEX IF NOT EXISTS idx_user_blocks_blocker_id ON user_blocks(blocker_id);
+CREATE INDEX IF NOT EXISTS idx_user_blocks_blocked_id ON user_blocks(blocked_id);
