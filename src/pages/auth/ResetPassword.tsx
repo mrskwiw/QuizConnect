@@ -15,34 +15,29 @@ const ResetPassword = () => {
   const { showToast } = useToast();
 
   useEffect(() => {
-    console.log('ResetPassword useEffect triggered.');
-    console.log('Current location.search:', location.search); // Add this line
     // Get the code from the URL search params
     const searchParams = new URLSearchParams(location.search);
     const code = searchParams.get('code');
-    console.log('Code from URL:', code);
 
     if (!code) {
-      console.log('No code found in URL, navigating to login.');
       navigate('/login');
       return;
     }
 
     // Verify the recovery code
     const verifyRecovery = async () => {
-      console.log('Verifying recovery code...');
       try {
         const { error } = await supabase.auth.exchangeCodeForSession(code);
         if (error) {
-          console.error('Error exchanging code for session:', error);
           showToast('Invalid or expired recovery link', 'error');
           navigate('/login');
         } else {
-          console.log('Code exchanged for session successfully.');
+          // If successful, the session is now active, and the user can set a new password.
+          // No explicit redirect here, as the user stays on this page to set the password.
+          // The handleSubmit will then navigate to login.
         }
       } catch (err: unknown) {
         const message = err instanceof Error ? err.message : 'Failed to verify recovery link';
-        console.error('Unexpected error during recovery verification:', err);
         showToast(message, 'error');
         navigate('/login');
       }
