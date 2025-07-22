@@ -1,8 +1,7 @@
 import { Outlet, Link } from 'react-router-dom';
 import { Brain } from 'lucide-react';
-import { Toast } from '../components/ui/Toast';
-
 export const AuthLayout = () => {
+  console.log('AuthLayout rendered.'); // Add console.log here
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
@@ -19,7 +18,7 @@ export const AuthLayout = () => {
           <Outlet />
         </div>
       </div>
-      <Toast />
+      {/* Removed redundant <Toast /> component here, as it's now in main.tsx */}
     </div>
   );
 };
