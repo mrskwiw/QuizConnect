@@ -28,5 +28,12 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
 // Helper function to get auth redirect URLs
 export const getAuthRedirectUrl = (path: string) => {
   const baseUrl = getBaseUrl();
-  return `${baseUrl}${path.startsWith('/') ? path : `/${path}`}`;
+  const redirectUrl = `${baseUrl}${path.startsWith('/') ? path : `/${path}`}`;
+  
+  if (import.meta.env.DEV) {
+    console.log(`Generated auth redirect URL: ${redirectUrl}`);
+    console.log(`NOTE: This URL must be added to the Redirect URLs in your Supabase project settings.`);
+  }
+  
+  return redirectUrl;
 };

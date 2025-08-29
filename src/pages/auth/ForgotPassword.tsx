@@ -24,17 +24,28 @@ const ForgotPassword = () => {
 
     try {
       setIsLoading(true);
-      const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: getAuthRedirectUrl('reset-password'),
+      
+      // Get the redirect URL
+      const redirectUrl = getAuthRedirectUrl('reset-password');
+      console.log('Password reset redirect URL:', redirectUrl);
+      
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: redirectUrl,
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase resetPasswordForEmail error:', error);
+        throw error;
+      }
 
       setIsSuccess(true);
       showToast('Password reset instructions have been sent to your email', 'success');
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Password reset error:', err);
-      setError(err.message || 'Failed to send reset instructions. Please try again.');
+      const message = err instanceof Error
+        ? err.message
+        : 'Failed to send reset instructions. Please try again.';
+      setError(message);
     } finally {
       setIsLoading(false);
     }

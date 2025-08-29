@@ -1,5 +1,4 @@
 import { createContext, useState, useEffect, ReactNode, useContext } from 'react';
-import { useNavigate } from 'react-router-dom'; // Import useNavigate
 import { User, SubscriptionTier } from '../types';
 import { useToast } from './ToastContext';
 import { supabase } from '../lib/supabase';
@@ -31,7 +30,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const { showToast } = useToast();
-  const navigate = useNavigate(); // Initialize useNavigate
 
   const refreshUser = async () => {
     const { data: { user: authUser } } = await supabase.auth.getUser();
@@ -79,10 +77,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      if (_event === 'PASSWORD_RECOVERY') {
-        // When a password recovery link is clicked, navigate to the reset password page
-        navigate('/reset-password');
-      } else if (session) {
+      if (session) {
         try {
           const userData = await userService.getProfile(session.user.id);
           setUser(userData);

@@ -27,17 +27,22 @@ const ResetPassword = () => {
     // Verify the recovery code
     const verifyRecovery = async () => {
       try {
+        console.log('Attempting to exchange recovery code for session...');
         const { error } = await supabase.auth.exchangeCodeForSession(code);
+        
         if (error) {
-          showToast('Invalid or expired recovery link', 'error');
+          console.error('Supabase recovery code error:', error);
+          showToast(`Recovery link error: ${error.message}`, 'error');
           navigate('/login');
         } else {
+          console.log('Recovery code exchange successful');
           // If successful, the session is now active, and the user can set a new password.
           // No explicit redirect here, as the user stays on this page to set the password.
           // The handleSubmit will then navigate to login.
         }
       } catch (err: unknown) {
         const message = err instanceof Error ? err.message : 'Failed to verify recovery link';
+        console.error('Unexpected error during recovery code verification:', err);
         showToast(message, 'error');
         navigate('/login');
       }
