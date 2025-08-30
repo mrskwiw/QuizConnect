@@ -15,9 +15,31 @@ const ResetPassword = () => {
   const { showToast } = useToast();
 
   useEffect(() => {
+    console.log('ResetPassword useEffect triggered.');
+    
+    // Enhanced debugging for URL parameters
+    console.log('Full URL:', window.location.href);
+    console.log('Hash:', window.location.hash);
+    console.log('Search:', window.location.search);
+    console.log('Pathname:', window.location.pathname);
+    
     // Get the code from the URL search params
     const searchParams = new URLSearchParams(location.search);
     const code = searchParams.get('code');
+    console.log('Code from URL search params:', code);
+    
+    // Also check URL hash for auth tokens (common in some flows)
+    const hashParams = new URLSearchParams(window.location.hash.substring(1));
+    const hashCode = hashParams.get('code');
+    const accessToken = hashParams.get('access_token');
+    const refreshToken = hashParams.get('refresh_token');
+    console.log('Code from URL hash:', hashCode);
+    console.log('Access token from hash:', accessToken);
+    console.log('Refresh token from hash:', refreshToken);
+    
+    // Log all available parameters
+    console.log('All search params:', Object.fromEntries(searchParams.entries()));
+    console.log('All hash params:', Object.fromEntries(hashParams.entries()));
 
     if (!code) {
       navigate('/login');
